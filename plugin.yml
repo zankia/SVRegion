@@ -1,0 +1,22 @@
+name: SVRegion
+main: fr.zankia.svregion.SVR
+version: 0.1
+description: Region renting
+author: zankia
+depend: [WorldEdit, WorldGuard]
+
+commands:
+  svregion:
+    description: Plugin management command.
+    aliases: [svr]
+    usage: /svregion action
+
+permissions:
+  svregion.*:
+    children:
+      svregion.admin: true
+      svregion.user: true
+  svregion.admin:
+    description: Allows managing the plugin.
+  svregion.user:
+    description: Allows using the plugin.

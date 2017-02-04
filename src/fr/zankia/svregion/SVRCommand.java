@@ -1,6 +1,5 @@
 package fr.zankia.svregion;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,11 +16,11 @@ public final class SVRCommand {
 	private static final String NO_WAND = ChatColor.RED + "Erreur : Vous devez d'abord vous procurer le sélecteur.";
 	private static final String NO_REGION = ChatColor.RED + "Erreur : Vous n'avez pas de région.";
 	private static final String ALREADY_DONE = ChatColor.RED + "Erreur : Vous avez déjà demandé le sélecteur.";
-	private static final String PLAYER_NOT_FOUND = ChatColor.RED + "Erreur : Joueur inconnu.";
+	private static final String PLAYER_NOT_FOUND = ChatColor.RED + "Erreur : Le joueur est introuvable.";
 	private static final String CONFIG_ERROR = ChatColor.RED + "Erreur dans la configuration. Veuillez contacter l'administrateur.";
 	private static final String PLUGIN_TITLE = ChatColor.RED + "SVRegion : " + ChatColor.GREEN;
 	
-	private static SVR pl = (SVR) Bukkit.getPluginManager().getPlugin("SVRegion");
+	private static SVR pl = SVR.getPlugin(SVR.class);
 	
 
 	public static boolean reloadCmd(CommandSender sender, String[] args) {
@@ -67,7 +66,7 @@ public final class SVRCommand {
 				} else {
 					if(hasRegion(p)) {
 						ConfigurationSection pinfo = SVR.getRegions().getConfigurationSection("regions."
-								+ p.getUniqueId().toString());
+								+ p.getWorld().getName() + "." + p.getUniqueId().toString());
 						p.sendMessage(PLUGIN_TITLE + "Cela vous coute " + pinfo.getDouble("price") + " "
 								+ VaultLink.economy.currencyNamePlural() + " par jour.");
 						p.sendMessage(PLUGIN_TITLE + "Il vous reste " + pinfo.getInt("remaining")
@@ -89,7 +88,7 @@ public final class SVRCommand {
 				PlayerMap map = PlayerMap.getInstance();
 				if(map.isRegistered(p)) {
 					if(map.getSelection(p).setRegion(p)) {
-						String path = "regions." + p.getUniqueId().toString();
+						String path = "regions." + p.getWorld().getName() + "." + p.getUniqueId().toString();
 						SVR.getRegions().createSection(path);
 						SVR.getRegions().set(path + ".price", getPrice(p));
 						SVR.getRegions().set(path + ".remaining", 0);
@@ -150,9 +149,9 @@ public final class SVRCommand {
 			if(sender instanceof Player) {
 				Player p = (Player) sender;
 				if(hasRegion(p)) {
-					Player toAdd = pl.getServer().getPlayer(args[1]);
-					if(toAdd != null) {
-						getRegion(p).removePlayer(toAdd.getUniqueId());
+					Player toRemove = pl.getServer().getPlayer(args[1]);
+					if(toRemove != null) {
+						getRegion(p).removePlayer(toRemove.getUniqueId());
 						sender.sendMessage(PLUGIN_TITLE + args[1] + " a été retiré");
 					} else
 						sender.sendMessage(PLAYER_NOT_FOUND);
@@ -188,7 +187,7 @@ public final class SVRCommand {
 	}
 
 	private static boolean hasRegion(Player p) {
-		return SVR.getRegions().contains("regions." + p.getUniqueId().toString());
+		return SVR.getRegions().contains("regions." + p.getWorld().getName() + "." + p.getUniqueId().toString());
 	}
 	
 	private static DefaultDomain getRegion(Player p) {

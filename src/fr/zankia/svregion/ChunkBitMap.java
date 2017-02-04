@@ -1,12 +1,11 @@
 package fr.zankia.svregion;
 
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Stack;
 import java.util.TreeSet;
 
 import com.sk89q.worldedit.BlockVector2D;
-
-import java.util.Stack;
 
 /**
  * @author Juleno_

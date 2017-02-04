@@ -9,12 +9,16 @@ public class Scheduler implements Runnable {
 		//reduce all region days in config
 		//delete the region if days < 0
 		ConfigurationSection regions = SVR.getRegions().getConfigurationSection("regions");
-		for(String uuid : regions.getKeys(false)) {
-			int remaining = regions.getInt(uuid + ".remaining");
-			if(remaining > 0) {
-				regions.set(uuid + ".remaining", --remaining);
-			} else {
-				regions.set(uuid, null);
+		for(String worlds : regions.getKeys(false)) {
+			ConfigurationSection world = regions.getConfigurationSection(worlds);
+			for(String uuid : world.getKeys(false)) {
+				int remaining = world.getInt(uuid + ".remaining");
+				if(remaining > 0) {
+					world.set(uuid + ".remaining", --remaining);
+				} else {
+					world.set(uuid, null);
+					SVR.getWG().getRegionManager(SVR.getPlugin(SVR.class).getServer().getWorld(worlds)).removeRegion(uuid);
+				}
 			}
 		}
 		SVR.saveRegions();

@@ -7,13 +7,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class Selector extends ItemStack {
-	Selection sel;
+	private static Material type;
+	private static final String name = "Sélecteur";
 
-	public Selector() {
-		super(Material.WOOD_HOE);
+	public Selector(Material mat) {
+		super(mat);
+		type = mat;
 		
 		ItemMeta meta = this.getItemMeta();
-		meta.setDisplayName("Sélecteur");
+		meta.setDisplayName(name);
 		
 		ArrayList<String> lore = new ArrayList<String>();
 		lore.add("Cliquez pour ajouter ou retirer");
@@ -21,20 +23,10 @@ public class Selector extends ItemStack {
 		meta.setLore(lore);
 		
 		this.setItemMeta(meta);
-		
-		this.sel = new Selection();
-	}
-	
-	public Selection getSel() {
-		return sel;
-	}
-
-	public boolean setRegion() {
-		return true;
 	}
 	
 	public static boolean isSelector(ItemStack item) {
-		return (item.getType() == Material.WOOD_HOE && item.getItemMeta().getDisplayName().equals("Sélecteur"));
+		return (item.getType() == type && item.getItemMeta().getDisplayName().equals(name));
 	}
 
 }

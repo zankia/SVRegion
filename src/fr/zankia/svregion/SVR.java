@@ -70,6 +70,12 @@ public class SVR extends JavaPlugin {
 				
 			case "cancel" :
 				return SVRCommand.cancelCmd(sender, args);
+				
+			case "add" :
+				return SVRCommand.addCmd(sender, args);
+				
+			case "remove" :
+				return SVRCommand.removeCmd(sender, args);
 			}
 		}
 		return false;

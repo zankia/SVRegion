@@ -9,6 +9,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
+import com.sk89q.worldguard.domains.DefaultDomain;
 
 public final class SVRCommand {
 	private static final String NO_PERMISSION = ChatColor.RED + "Erreur : Vous n'avez pas la permission pour cette commande.";
@@ -16,6 +17,7 @@ public final class SVRCommand {
 	private static final String NO_WAND = ChatColor.RED + "Erreur : Vous devez d'abord vous procurer le sélecteur.";
 	private static final String NO_REGION = ChatColor.RED + "Erreur : Vous n'avez pas de région.";
 	private static final String ALREADY_DONE = ChatColor.RED + "Erreur : Vous avez déjà demandé le sélecteur.";
+	private static final String PLAYER_NOT_FOUND = ChatColor.RED + "Erreur : Joueur inconnu.";
 	private static final String CONFIG_ERROR = ChatColor.RED + "Erreur dans la configuration. Veuillez contacter l'administrateur.";
 	private static final String PLUGIN_TITLE = ChatColor.RED + "SVRegion : " + ChatColor.GREEN;
 	
@@ -63,7 +65,7 @@ public final class SVRCommand {
 					p.sendMessage(PLUGIN_TITLE + "Cela vous coutera " + getPrice(p) + " "
 							+ VaultLink.economy.currencyNamePlural() + " par jour.");
 				} else {
-					if(SVR.getRegions().contains("regions." + p.getUniqueId().toString())) {
+					if(hasRegion(p)) {
 						ConfigurationSection pinfo = SVR.getRegions().getConfigurationSection("regions."
 								+ p.getUniqueId().toString());
 						p.sendMessage(PLUGIN_TITLE + "Cela vous coute " + pinfo.getDouble("price") + " "
@@ -113,9 +115,49 @@ public final class SVRCommand {
 				Player p = (Player) sender;
 				if(PlayerMap.getInstance().removePlayer(p)) {
 					removeWand(p);
-					sender.sendMessage(PLUGIN_TITLE + ("Sélection annulée"));
+					sender.sendMessage(PLUGIN_TITLE + "Sélection annulée");
 				} else
 					sender.sendMessage(NO_WAND);
+			} else
+				sender.sendMessage(NOT_PLAYER);
+		} else
+			sender.sendMessage(NO_PERMISSION);
+		return true;
+	}
+
+	public static boolean addCmd(CommandSender sender, String[] args) {
+		if(sender.hasPermission("svregion.user")) {
+			if(sender instanceof Player) {
+				Player p = (Player) sender;
+				if(hasRegion(p)) {
+					Player toAdd = pl.getServer().getPlayer(args[1]);
+					if(toAdd != null) {
+						getRegion(p).addPlayer(toAdd.getUniqueId());
+						sender.sendMessage(PLUGIN_TITLE + args[1] + " a été ajouté");
+					} else
+						sender.sendMessage(PLAYER_NOT_FOUND);
+				} else
+					sender.sendMessage(NO_REGION);
+			} else
+				sender.sendMessage(NOT_PLAYER);
+		} else
+			sender.sendMessage(NO_PERMISSION);
+		return true;
+	}
+
+	public static boolean removeCmd(CommandSender sender, String[] args) {
+		if(sender.hasPermission("svregion.user")) {
+			if(sender instanceof Player) {
+				Player p = (Player) sender;
+				if(hasRegion(p)) {
+					Player toAdd = pl.getServer().getPlayer(args[1]);
+					if(toAdd != null) {
+						getRegion(p).removePlayer(toAdd.getUniqueId());
+						sender.sendMessage(PLUGIN_TITLE + args[1] + " a été retiré");
+					} else
+						sender.sendMessage(PLAYER_NOT_FOUND);
+				} else
+					sender.sendMessage(NO_REGION);
 			} else
 				sender.sendMessage(NOT_PLAYER);
 		} else
@@ -143,5 +185,13 @@ public final class SVRCommand {
 
 	private static double getPrice(Player p) {
 		return PlayerMap.getInstance().getSelection(p).getPrice(SVR.getConfigs().getDouble("bpc"), p);
+	}
+
+	private static boolean hasRegion(Player p) {
+		return SVR.getRegions().contains("regions." + p.getUniqueId().toString());
+	}
+	
+	private static DefaultDomain getRegion(Player p) {
+		return SVR.getWG().getRegionManager(p.getWorld()).getRegion(p.getUniqueId().toString()).getMembers();
 	}
 }

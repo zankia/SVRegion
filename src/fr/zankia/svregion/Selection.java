@@ -1,5 +1,6 @@
 package fr.zankia.svregion;
 
+import java.util.ArrayList;
 import java.util.ListIterator;
 
 import org.bukkit.Location;
@@ -25,6 +26,14 @@ public class Selection {
 		this.region = new ChunkBitMap();
 		this.min = 256;
 		this.max = 0;
+	}
+	
+	public Selection(Player p) {
+		ProtectedRegion region = SVR.getWG().getRegionManager(p.getWorld()).getRegion(p.getUniqueId().toString());
+		this.region = new ChunkBitMap(new ArrayList<BlockVector2D>(region.getPoints()));
+		this.min = region.getMinimumPoint().getBlockY();
+		this.max = region.getMaximumPoint().getBlockY();
+		this.showSel(p);
 	}
 	
 	public double getPrice(double bpc, Player p) {

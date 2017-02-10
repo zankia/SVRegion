@@ -67,9 +67,12 @@ public class SVR extends JavaPlugin {
 				
 			case "confirm" :
 				return SVRCommand.confirmCmd(sender, args);
-				
+
 			case "cancel" :
 				return SVRCommand.cancelCmd(sender, args);
+				
+			case "modify" :
+				return SVRCommand.modifyCmd(sender, args);
 				
 			case "add" :
 				return SVRCommand.addCmd(sender, args);

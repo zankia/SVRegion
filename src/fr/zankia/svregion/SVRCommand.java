@@ -124,6 +124,30 @@ public final class SVRCommand {
 		return true;
 	}
 
+	public static boolean modifyCmd(CommandSender sender, String[] args) {
+		if(sender.hasPermission("svregion.user")) {
+			if(sender instanceof Player) {
+				Player p = (Player) sender;
+				if(hasRegion(p)) {
+					if(PlayerMap.getInstance().addPlayerRegion(p)) {
+						Material mat = Material.getMaterial(SVR.getConfigs().getString("selectorName"));
+						if(mat != null) {
+							p.getInventory().addItem(new Selector(mat));
+							p.sendMessage(PLUGIN_TITLE + "Voici votre sélecteur.");
+						} else {
+							p.sendMessage(CONFIG_ERROR);
+						}
+					} else
+						p.sendMessage(ALREADY_DONE);
+				} else
+					sender.sendMessage(NO_REGION);
+			} else
+				sender.sendMessage(NOT_PLAYER);
+		} else
+			sender.sendMessage(NO_PERMISSION);
+		return true;
+	}
+
 	public static boolean addCmd(CommandSender sender, String[] args) {
 		if(sender.hasPermission("svregion.user")) {
 			if(sender instanceof Player) {

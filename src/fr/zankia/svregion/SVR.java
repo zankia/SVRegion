@@ -115,8 +115,8 @@ public class SVR extends JavaPlugin {
 
 	private void setupScheduler() {
 		Calendar time = Calendar.getInstance();
-		int remaing = 1440 - (time.get(Calendar.HOUR_OF_DAY) * 60 + time.get(Calendar.MINUTE));
-		this.scheduler.scheduleWithFixedDelay(new Scheduler(), remaing, 1440, TimeUnit.MINUTES);
+		int remaining = 1440 - (time.get(Calendar.HOUR_OF_DAY) * 60 + time.get(Calendar.MINUTE));
+		this.scheduler.scheduleWithFixedDelay(new Scheduler(), remaining, 1440, TimeUnit.MINUTES);
 	}
 
 }

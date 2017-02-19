@@ -62,13 +62,15 @@ public final class SVRCommand {
 				PlayerMap map = PlayerMap.getInstance();
 				if(map.isRegistered(p)) {
 					p.sendMessage(PLUGIN_TITLE + "Cela vous coutera " + getPrice(p) + " "
-							+ VaultLink.economy.currencyNamePlural() + " par jour.");
+							+ (SVR.getConfigs().getBoolean("useEconomy") ? VaultLink.economy.currencyNamePlural() : "items")
+							+ " par jour.");
 				} else {
 					if(hasRegion(p)) {
 						ConfigurationSection pinfo = SVR.getRegions().getConfigurationSection("regions."
 								+ p.getWorld().getName() + "." + p.getUniqueId().toString());
 						p.sendMessage(PLUGIN_TITLE + "Cela vous coute " + pinfo.getDouble("price") + " "
-								+ VaultLink.economy.currencyNamePlural() + " par jour.");
+								+ (SVR.getConfigs().getBoolean("useEconomy") ? VaultLink.economy.currencyNamePlural() : "items")
+								+ " par jour.");
 						p.sendMessage(PLUGIN_TITLE + "Il vous reste " + pinfo.getInt("remaining")
 								+ (pinfo.getInt("remaining") > 1 ? " jours." : " jour."));
 					} else
@@ -87,7 +89,10 @@ public final class SVRCommand {
 				Player p = (Player) sender;
 				PlayerMap map = PlayerMap.getInstance();
 				if(map.isRegistered(p)) {
-					if(map.getSelection(p).setRegion(p)) {
+					Payment pay = SVR.getConfigs().getBoolean("useEconomy")
+							? new PaymentEconomy(p, getPrice(p)) : new PaymentItem(p, getPrice(p));
+					pay.setCurrentPrice();
+					if(pay.pay() && map.getSelection(p).setRegion(p)) {
 						String path = "regions." + p.getWorld().getName() + "." + p.getUniqueId().toString();
 						SVR.getRegions().createSection(path);
 						SVR.getRegions().set(path + ".price", getPrice(p));
@@ -207,7 +212,7 @@ public final class SVRCommand {
 	}
 
 	private static double getPrice(Player p) {
-		return PlayerMap.getInstance().getSelection(p).getPrice(SVR.getConfigs().getDouble("bpc"), p);
+		return PlayerMap.getInstance().getSelection(p).getPrice(SVR.getConfigs().getDouble("upc"), p);
 	}
 
 	private static boolean hasRegion(Player p) {

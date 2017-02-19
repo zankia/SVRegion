@@ -36,9 +36,9 @@ public class Selection {
 		this.showSel(p);
 	}
 	
-	public double getPrice(double bpc, Player p) {
+	public double getPrice(double upc, Player p) {
 		this.showSel(p);
-		return bpc * ((this.max - this.min + 1) / 16) * this.region.size();
+		return upc * ((this.max - this.min + 1) / 16) * this.region.size();
 	}
 
 	public int addChunk(Player p, int x, int y, int z) {

@@ -1,2 +1,4 @@
 selectorName: WOOD_HOE
-bpc: 1
+upc: 1
+useEconomy: false
+unit: WHEAT

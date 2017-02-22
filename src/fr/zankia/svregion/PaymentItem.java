@@ -9,14 +9,14 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class PaymentItem extends Payment {
 
-	public PaymentItem(Player p, double price) {
-		super(p, price);
+	public PaymentItem(Player player, double price) {
+		super(player, price);
 	}
 
 	@Override
 	public boolean pay() {
 		Material mat = Material.getMaterial(SVR.getConfigs().getString("unit"));
-		PlayerInventory inv = this.p.getInventory();
+		PlayerInventory inv = this.player.getInventory();
 		int amount = this.quantity * (int) (this.price);
 		for(ListIterator<ItemStack> ite =  inv.iterator(inv.first(mat)); ite.hasNext() ; ) {
 			ItemStack item = ite.next();

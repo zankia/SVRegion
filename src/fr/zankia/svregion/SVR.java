@@ -76,9 +76,12 @@ public class SVR extends JavaPlugin {
 				
 			case "add" :
 				return SVRCommand.addCmd(sender, args);
-				
+
 			case "remove" :
 				return SVRCommand.removeCmd(sender, args);
+				
+			case "pay" :
+				return SVRCommand.payCmd(sender, args);
 			}
 		}
 		return false;

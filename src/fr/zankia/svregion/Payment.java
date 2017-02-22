@@ -8,12 +8,22 @@ public abstract class Payment {
 	
 	protected double price;
 	protected int quantity;
-	protected Player p;
+	protected Player player;
 	
-	public Payment(Player p, double price) {
+	public Payment(Player player, double price) {
 		this.price = price;
-		this.p = p;
+		this.player = player;
 		this.quantity = 1;
+	}
+	
+	public void setQuantity(int quantity) {
+		if(quantity > 0) {
+			this.quantity = quantity;
+		}
+	}
+	
+	public int getQuantity() {
+		return this.quantity;
 	}
 	
 	public void setCurrentPrice() {
@@ -24,5 +34,6 @@ public abstract class Payment {
 	}
 
 	public abstract boolean pay();
+
 
 }

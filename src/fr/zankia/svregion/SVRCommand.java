@@ -15,6 +15,7 @@ public final class SVRCommand {
 	private static final String NOT_PLAYER = ChatColor.RED + "Erreur : Vous devez être un joueur pour utiliser cette commande.";
 	private static final String NO_WAND = ChatColor.RED + "Erreur : Vous devez d'abord vous procurer le sélecteur.";
 	private static final String NO_REGION = ChatColor.RED + "Erreur : Vous n'avez pas de région.";
+	private static final String NOT_ENOUGH_MONEY = ChatColor.RED + "Erreur : Vous n'avez pas assez d'argent.";;
 	private static final String ALREADY_DONE = ChatColor.RED + "Erreur : Vous avez déjà demandé le sélecteur.";
 	private static final String PLAYER_NOT_FOUND = ChatColor.RED + "Erreur : Le joueur est introuvable.";
 	private static final String CONFIG_ERROR = ChatColor.RED + "Erreur dans la configuration. Veuillez contacter l'administrateur.";
@@ -62,15 +63,16 @@ public final class SVRCommand {
 				PlayerMap map = PlayerMap.getInstance();
 				if(map.isRegistered(p)) {
 					p.sendMessage(PLUGIN_TITLE + "Cela vous coutera " + getPrice(p) + " "
-							+ (SVR.getConfigs().getBoolean("useEconomy") ? VaultLink.economy.currencyNamePlural() : "items")
-							+ " par jour.");
+							+ (SVR.getConfigs().getBoolean("useEconomy")
+							? VaultLink.economy.currencyNamePlural() : "items") + " par jour.");
 				} else {
 					if(hasRegion(p)) {
-						ConfigurationSection pinfo = SVR.getRegions().getConfigurationSection("regions."
-								+ p.getWorld().getName() + "." + p.getUniqueId().toString());
-						p.sendMessage(PLUGIN_TITLE + "Cela vous coute " + pinfo.getDouble("price") + " "
-								+ (SVR.getConfigs().getBoolean("useEconomy") ? VaultLink.economy.currencyNamePlural() : "items")
-								+ " par jour.");
+						ConfigurationSection pinfo = SVR.getRegions().getConfigurationSection(
+								"regions." + p.getWorld().getName() + "."
+								+ p.getUniqueId().toString());
+						p.sendMessage(PLUGIN_TITLE + "Cela vous coute " + pinfo.getDouble("price")
+								+ " " + (SVR.getConfigs().getBoolean("useEconomy")
+								? VaultLink.economy.currencyNamePlural() : "items") + " par jour.");
 						p.sendMessage(PLUGIN_TITLE + "Il vous reste " + pinfo.getInt("remaining")
 								+ (pinfo.getInt("remaining") > 1 ? " jours." : " jour."));
 					} else
@@ -92,15 +94,20 @@ public final class SVRCommand {
 					Payment pay = SVR.getConfigs().getBoolean("useEconomy")
 							? new PaymentEconomy(p, getPrice(p)) : new PaymentItem(p, getPrice(p));
 					pay.setCurrentPrice();
-					if(pay.pay() && map.getSelection(p).setRegion(p)) {
-						String path = "regions." + p.getWorld().getName() + "." + p.getUniqueId().toString();
+					if(pay.pay()) {
+						if(map.getSelection(p).setRegion(p)) {
+						String path = "regions." + p.getWorld().getName() + "."
+								+ p.getUniqueId().toString();
 						SVR.getRegions().createSection(path);
 						SVR.getRegions().set(path + ".price", getPrice(p));
 						SVR.getRegions().set(path + ".remaining", 0);
 						SVR.saveRegions();
 						p.sendMessage(PLUGIN_TITLE + "Région créée");
+						} else {
+							p.sendMessage(PLUGIN_TITLE + "Erreur lors de la création de la région");
+						}
 					} else {
-						p.sendMessage(PLUGIN_TITLE + "Erreur lors de la création de la région");
+						p.sendMessage(NOT_ENOUGH_MONEY);
 					}
 					removeWand(p);
 					map.removePlayer(p);
@@ -135,7 +142,8 @@ public final class SVRCommand {
 				Player p = (Player) sender;
 				if(hasRegion(p)) {
 					if(PlayerMap.getInstance().addPlayerRegion(p)) {
-						Material mat = Material.getMaterial(SVR.getConfigs().getString("selectorName"));
+						Material mat = Material.getMaterial(
+								SVR.getConfigs().getString("selectorName"));
 						if(mat != null) {
 							p.getInventory().addItem(new Selector(mat));
 							p.sendMessage(PLUGIN_TITLE + "Voici votre sélecteur.");
@@ -193,6 +201,44 @@ public final class SVRCommand {
 		return true;
 	}
 
+	public static boolean payCmd(CommandSender sender, String[] args) {
+		if(sender.hasPermission("svregion.pay")) {
+			if(sender instanceof Player) {
+				Player p = (Player) sender;
+				if(hasRegion(p)) {
+					if(args.length == 2) {
+						ConfigurationSection reg = SVR.getRegions().getConfigurationSection(
+								"regions." + p.getWorld().getName() + "."
+								+ p.getUniqueId().toString());
+						Payment pay = SVR.getConfigs().getBoolean("useEconomy")
+								? new PaymentEconomy(p, reg.getDouble("price"))
+								: new PaymentItem(p, reg.getDouble("price"));
+						try {
+							pay.setQuantity(Integer.parseInt(args[1]));
+						} catch(NumberFormatException e) {
+							return false;
+						}
+						if(pay.pay()) {
+							reg.set("remaining",  pay.getQuantity() + (int) reg.get("remaining"));
+						} else {
+							sender.sendMessage(NOT_ENOUGH_MONEY);
+						}
+					} else {
+						if(SVR.getConfigs().getBoolean("useEconomy")) {
+							return false;
+						} else {
+							new PaymentTerminal(p);
+						}
+					}
+				} else
+					sender.sendMessage(NO_REGION);
+			} else
+				sender.sendMessage(NOT_PLAYER);
+		} else
+			sender.sendMessage(NO_PERMISSION);
+		return true;
+	}
+
 	//TODO : Find a better way to remove ONLY the wand
 	private static void removeWand(Player p) {
 		Material mat = Material.getMaterial(SVR.getConfigs().getString("selectorName"));
@@ -216,10 +262,12 @@ public final class SVRCommand {
 	}
 
 	private static boolean hasRegion(Player p) {
-		return SVR.getRegions().contains("regions." + p.getWorld().getName() + "." + p.getUniqueId().toString());
+		return SVR.getRegions().contains("regions." + p.getWorld().getName() + "."
+				+ p.getUniqueId().toString());
 	}
 	
 	private static DefaultDomain getRegion(Player p) {
-		return SVR.getWG().getRegionManager(p.getWorld()).getRegion(p.getUniqueId().toString()).getMembers();
+		return SVR.getWG().getRegionManager(p.getWorld()).getRegion(
+				p.getUniqueId().toString()).getMembers();
 	}
 }

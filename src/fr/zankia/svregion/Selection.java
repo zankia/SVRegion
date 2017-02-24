@@ -79,6 +79,9 @@ public class Selection {
 		wgRegion.setOwners(owner);
 
 		RegionManager rm = SVR.getWG().getRegionContainer().get(p.getWorld());
+		if(rm.overlapsUnownedRegion(wgRegion, SVR.getWG().wrapPlayer(p))) {
+			return false;
+		}
 		rm.addRegion(wgRegion);
 		try {
 			rm.save();

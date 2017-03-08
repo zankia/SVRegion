@@ -57,9 +57,11 @@ public class Selection {
 			break;
 		
 		case -1:
-			if(y == this.min)
+			if(y == this.min && y + 15 == this.max)
+				break;
+			else if(y == this.min)
 				this.min += 16;
-			if(y + 15 == this.max)
+			else if(y + 15 == this.max)
 				this.max -= 16;
 			break;
 		}

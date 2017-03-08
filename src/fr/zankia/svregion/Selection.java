@@ -1,6 +1,5 @@
 package fr.zankia.svregion;
 
-import java.util.ArrayList;
 import java.util.ListIterator;
 
 import org.bukkit.Location;
@@ -30,9 +29,10 @@ public class Selection {
 	
 	public Selection(Player p) {
 		ProtectedRegion region = SVR.getWG().getRegionManager(p.getWorld()).getRegion(p.getUniqueId().toString());
-		this.region = new ChunkBitMap(new ArrayList<BlockVector2D>(region.getPoints()));
+		this.region = new ChunkBitMap(region);
 		this.min = region.getMinimumPoint().getBlockY();
 		this.max = region.getMaximumPoint().getBlockY();
+		showWE(p);
 		this.showSel(p);
 	}
 	
@@ -64,9 +64,7 @@ public class Selection {
 			break;
 		}
 		
-		if(!this.region.getCorners().isEmpty() && SVR.getWE().getSession(p).hasCUISupport()) {
-			SVR.getWE().setSelection(p, new Polygonal2DSelection(p.getWorld(), this.region.getCorners(), min, max));
-		}
+		showWE(p);
 		return res;
 	}
 
@@ -90,6 +88,12 @@ public class Selection {
 			return false;
 		}
 		return true;
+	}
+
+	private void showWE(Player p) {
+		if(!this.region.getCorners().isEmpty() && SVR.getWE().getSession(p).hasCUISupport()) {
+			SVR.getWE().setSelection(p, new Polygonal2DSelection(p.getWorld(), this.region.getCorners(), min, max));
+		}
 	}
 
 	private void showSel(Player p) {

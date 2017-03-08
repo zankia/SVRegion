@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 /**
  * @author Juleno_
@@ -59,6 +61,16 @@ public class ChunkBitMap {
 		}
 	}
 	
+	public ChunkBitMap(ProtectedRegion region) {
+		this();
+		BlockVector min = region.getMinimumPoint();
+		BlockVector max = region.getMaximumPoint();
+		for(int x = min.getBlockX() >> 4; x << 4 <= max.getBlockX(); x++)
+			for(int z = min.getBlockZ() >> 4; z << 4 <= max.getBlockZ(); z++)
+				if(region.contains(new BlockVector2D(x << 4, z << 4)))
+					add(x,z);
+	}
+
 	public boolean contains(int x, int z) {
 		return (this.chunksX.contains(x) && this.chunks.get(x).contains(z));
 	}
@@ -222,18 +234,30 @@ public class ChunkBitMap {
 		return nearestIndex;
 	}
 
-/*
-	public void add(int x, int z) {
+
+	private void add(int x, int z) {
 		this.modified = true;
 		if(this.contains(x, z))
 			return;
-		if(!chunksX.contains(x)) {
+		else if(this.chunksX.size() == 0) {
+			this.minZ = z;
+			this.maxZ = z;
 			this.chunks.put(x, new TreeSet<Integer>());
 			this.chunksX.add(x);
+			this.chunks.get(x).add(z);
+		} else {
+			if(z < this.minZ)
+				this.minZ = z;
+			if(z > this.maxZ)
+				this.maxZ = z;
+			if(!this.chunksX.contains(x)) {
+				this.chunks.put(x, new TreeSet<Integer>());
+				this.chunksX.add(x);
+			}
+			this.chunks.get(x).add(z);
 		}
-		this.chunks.get(x).add(z);
 	}
-	
+/*
 	public void remove(int x, int z) {
 		this.modified = true;
 		if(!this.contains(x, z))

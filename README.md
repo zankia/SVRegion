@@ -1,33 +1,33 @@
-# SVPlayer
+# SVRegion
 Region renting
 
-##English
+## English
 
-###Description
+### Description
 This plugin
 
-###Features
+### Features
 * 
 
-###Commands
+### Commands
 **Note** :
 
 `<arg>` : required
 
 `[arg]` : optional
 
-#####Permission
+##### Permission
 
 
-##Français
+## Français
 
-###Description
+### Description
 Ce plugin
 
-###Fonctionnalités
+### Fonctionnalités
 * 
 
-###Commandes
+### Commandes
 **Note** :
 
 `<arg>` : requis
@@ -35,4 +35,4 @@ Ce plugin
 `[arg]` : optionnel
 
 
-#####Permission
+##### Permission

@@ -9,6 +9,10 @@ import org.bukkit.entity.Player;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection;
 import com.sk89q.worldguard.domains.DefaultDomain;
+import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.FlagContext;
+import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
@@ -77,6 +81,15 @@ public class Selection {
 		DefaultDomain owner = new DefaultDomain();
 		owner.addPlayer(p.getUniqueId());
 		wgRegion.setOwners(owner);
+		
+		//TODO: export this with configuration instead of hardcode
+		Flag<?> pvpFlag = DefaultFlag.fuzzyMatchFlag(SVR.getWG().getFlagRegistry(), "pvp");
+		try {
+			addFlag(wgRegion, pvpFlag, "deny");
+		} catch (InvalidFlagFormat e1) {
+			e1.printStackTrace();
+			return false;
+		}
 
 		RegionManager rm = SVR.getWG().getRegionContainer().get(p.getWorld());
 		if(rm.overlapsUnownedRegion(wgRegion, SVR.getWG().wrapPlayer(p))) {
@@ -90,6 +103,10 @@ public class Selection {
 			return false;
 		}
 		return true;
+	}
+
+	private <V> void addFlag(ProtectedRegion wgRegion, Flag<V> f, String value) throws InvalidFlagFormat {
+		wgRegion.setFlag(f, f.parseInput(FlagContext.create().setInput(value).build()));
 	}
 
 	private void showWE(Player p) {
